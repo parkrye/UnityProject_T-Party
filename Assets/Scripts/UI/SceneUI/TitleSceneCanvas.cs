@@ -40,6 +40,7 @@ public class TitleSceneCanvas : SceneUI
         inputFields["NameInputField"].text = "";
         PhotonNetwork.LocalPlayer.NickName = playerName;
         PhotonNetwork.ConnectUsingSettings();
+        GameManager.Scene.LoadScene("LobbyScene");
     }
 
     void OnQuitButtonTouched()
