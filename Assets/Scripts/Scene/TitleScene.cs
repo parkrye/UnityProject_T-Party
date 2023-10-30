@@ -1,9 +1,11 @@
 using System.Collections;
+using UnityEngine;
 
 public class TitleScene : BaseScene
 {
     protected override IEnumerator LoadingRoutine()
     {
-        throw new System.NotImplementedException();
+        yield return null;
+        Progress = 1f;
     }
 }
