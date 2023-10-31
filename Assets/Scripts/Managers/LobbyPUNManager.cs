@@ -102,8 +102,7 @@ public class LobbyPUNManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
-        if (lobbyCanvas.isActiveAndEnabled)
-            lobbyCanvas.UpdateRoomList(roomList);
+
     }
 
     public override void OnLeftLobby()
