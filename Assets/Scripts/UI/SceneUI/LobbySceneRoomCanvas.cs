@@ -1,31 +1,22 @@
 using Photon.Pun;
 using Photon.Realtime;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LobbySceneRoomCanvas : SceneUI
 {
-    [SerializeField] RectTransform playerContent;
-    [SerializeField] PlayerEntry playerEntryPrefab;
-
-    [SerializeField] List<PlayerEntry> playerEntryList;
-    [SerializeField] GameObject roomPanel, lobbyPanel;
+    [SerializeField] PlayerEntry[] playerEntryList;
 
     protected override void Awake()
     {
         base.Awake();
-        playerEntryList = new List<PlayerEntry>();
     }
 
     private void OnEnable()
     {
-        foreach (Player player in PhotonNetwork.PlayerList)
+        int index = 0;
+        for(index = 0; index < PhotonNetwork.PlayerList.Length; index++)
         {
-            PlayerEntry entry = Instantiate(playerEntryPrefab, playerContent);
-            //entry.Initailize(player, player.ActorNumber, player.NickName, avatarCameras[avatarDictionary[player]], avatarTextures[avatarDictionary[player]], avatarRoots[avatarDictionary[player]], player.ActorNumber);
-            playerEntryList.Add(entry);
-            entry.playerNameButton.onClick.AddListener(() => { OnSwitchMasterClient(player); });
+            playerEntryList[index].Initialize(PhotonNetwork.PlayerList[index]);
         }
 
         PhotonNetwork.LocalPlayer.SetReady(false);
@@ -33,27 +24,23 @@ public class LobbySceneRoomCanvas : SceneUI
 
         AllPlayerReadyCheck();
         PhotonNetwork.AutomaticallySyncScene = true;
-        roomPanel.SetActive(true);
-        lobbyPanel.SetActive(false);
     }
 
     private void OnDisable()
     {
         foreach (PlayerEntry entry in playerEntryList)
         {
-            Destroy(entry.gameObject);
+            entry.ResetEntry();
         }
-        playerEntryList.Clear();
 
         PhotonNetwork.AutomaticallySyncScene = false;
     }
 
     public void PlayerEnterRoom(Player newPlayer)
     {
-        PlayerEntry entry = Instantiate(playerEntryPrefab, playerContent);
-        //entry.Initailize(newPlayer, entryNumQueue.Dequeue(), newPlayer.NickName, avatarCameras[avatarDictionary[newPlayer]], avatarTextures[avatarDictionary[newPlayer]], avatarRoots[avatarDictionary[newPlayer]], newPlayer.ActorNumber);
-        entry.playerNameButton.onClick.AddListener(() => { OnSwitchMasterClient(newPlayer); });
-        playerEntryList.Add(entry);
+        int index = PhotonNetwork.PlayerList.Length - 1;
+        playerEntryList[index].Initialize(PhotonNetwork.PlayerList[index]);
+
         AllPlayerReadyCheck();
 
         UpdateRoomState();
@@ -61,12 +48,11 @@ public class LobbySceneRoomCanvas : SceneUI
 
     public void PlayerLeftRoom(Player leftPlayer)
     {
-        for (int i = 0; i < playerEntryList.Count; i++)
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             if (playerEntryList[i].player.Equals(leftPlayer))
             {
-                Destroy(playerEntryList[i].gameObject);
-                playerEntryList.RemoveAt(i);
+                playerEntryList[i].ResetEntry();
                 break;
             }
         }
@@ -77,7 +63,7 @@ public class LobbySceneRoomCanvas : SceneUI
 
     public void PlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        for (int i = 0; i < playerEntryList.Count; i++)
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             if (playerEntryList[i].player.Equals(targetPlayer))
             {
@@ -90,10 +76,6 @@ public class LobbySceneRoomCanvas : SceneUI
 
     public void MasterClientSwitched(Player newMasterClient)
     {
-        foreach (PlayerEntry entry in playerEntryList)
-        {
-            entry.CheckAmIMaster();
-        }
         AllPlayerReadyCheck();
     }
 
@@ -102,7 +84,7 @@ public class LobbySceneRoomCanvas : SceneUI
         if (!PhotonNetwork.IsMasterClient)
             return;
 
-        buttons["StartButton"].gameObject.SetActive(CheckPlayerReady());
+        buttons["ReadyButton"].gameObject.SetActive(CheckPlayerReady());
     }
 
     public bool CheckPlayerReady()
@@ -119,7 +101,7 @@ public class LobbySceneRoomCanvas : SceneUI
     {
         if (!PhotonNetwork.IsMasterClient)
         {
-            buttons["StartButton"].gameObject.SetActive(false);
+            buttons["ReadyButton"].gameObject.SetActive(false);
             return;
         }
 
@@ -131,9 +113,9 @@ public class LobbySceneRoomCanvas : SceneUI
         }
 
         if (readyCount == PhotonNetwork.PlayerList.Length)
-            buttons["StartButton"].gameObject.SetActive(true);
+            buttons["ReadyButton"].gameObject.SetActive(true);
         else
-            buttons["StartButton"].gameObject.SetActive(false);
+            buttons["ReadyButton"].gameObject.SetActive(false);
     }
 
     public void OnSwitchMasterClient(Player clickedPlayer)
@@ -148,7 +130,7 @@ public class LobbySceneRoomCanvas : SceneUI
         PhotonNetwork.CurrentRoom.IsOpen = false;
         PhotonNetwork.CurrentRoom.IsVisible = false;
 
-        PhotonNetwork.LoadLevel("InGameScene");
+        //PhotonNetwork.LoadLevel("InGameScene");
     }
 
     public void OnLeaveRoomClicked()

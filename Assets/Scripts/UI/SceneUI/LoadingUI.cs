@@ -8,8 +8,8 @@ public class LoadingUI : MonoBehaviour
 
     void Awake()
     {
-        slider = GetComponentInChildren<Slider>();
-        anim = GetComponent<Animator>();
+        //slider = GetComponentInChildren<Slider>();
+        //anim = GetComponent<Animator>();
     }
 
     public void SetProgress(float progress)

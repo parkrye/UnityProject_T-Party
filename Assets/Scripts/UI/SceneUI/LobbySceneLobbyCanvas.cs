@@ -3,12 +3,15 @@ using Photon.Realtime;
 using UnityEngine;
 
 public class LobbySceneLobbyCanvas : SceneUI
-{
-    [SerializeField] GameObject lobbyPanel, roomPanel;
-
-    protected override void Awake()
+{    protected override void Awake()
     {
         base.Awake();
+
+        texts["NameText"].text = GameData.PLAYER_NAME;
+        buttons["JoinButton"].onClick.AddListener(OnRandomMatchingButtonTouched);
+        buttons["BackButton"].onClick.AddListener(OnLeaveLobbyButtonTouched);
+        buttons["UpAvatarButton"].onClick.AddListener(OnUpAvatarButtonTouched);
+        buttons["DownAvatarButton"].onClick.AddListener(OnDownAvatarButtonTouched);
     }
 
     void OnEnable()
@@ -16,26 +19,40 @@ public class LobbySceneLobbyCanvas : SceneUI
         PhotonNetwork.JoinLobby();
     }
 
-    public void OnCreateRoomButtonClicked()
-    {
-        roomPanel.gameObject.SetActive(true);
-        lobbyPanel.gameObject.SetActive(false);
-    }
-
-    public void OnLeaveLobbyClicked()
+    void OnLeaveLobbyButtonTouched()
     {
         GameManager.Scene.LoadScene("StartScene");
     }
 
-    public void OnRandomMatchingButtonClicked()
+    void OnRandomMatchingButtonTouched()
     {
-        string name = string.Format("Room{0}", Random.Range(1000, 10000));
         RoomOptions roomOptions = new()
         {
-            IsVisible = true,
             IsOpen = true,
             MaxPlayers = 8
         };
-        PhotonNetwork.JoinRandomOrCreateRoom(roomName: name, roomOptions: roomOptions, expectedCustomRoomProperties: roomOptions.CustomRoomProperties);
+        PhotonNetwork.JoinRandomOrCreateRoom(roomOptions: roomOptions);
+    }
+
+    void OnUpAvatarButtonTouched()
+    {
+        GameData.PLAYER_AVATAR--;
+        if (GameData.PLAYER_AVATAR < 0)
+            GameData.PLAYER_AVATAR = 4;
+        ChangeAvatarImage();
+    }
+
+    void OnDownAvatarButtonTouched()
+    {
+        GameData.PLAYER_AVATAR++;
+        if (GameData.PLAYER_AVATAR > 4)
+            GameData.PLAYER_AVATAR = 0;
+        ChangeAvatarImage();
+    }
+
+    void ChangeAvatarImage()
+    {
+        images["AvatarImage"].sprite = GameData.AVATAR[GameData.PLAYER_AVATAR];
+        PhotonNetwork.LocalPlayer.CustomProperties[GameData.PLAYER_AVATAR] = GameData.PLAYER_AVATAR;
     }
 }

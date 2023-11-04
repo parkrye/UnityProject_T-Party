@@ -12,6 +12,11 @@ public class LobbyPUNManager : MonoBehaviourPunCallbacks
     [SerializeField] LobbySceneLobbyCanvas lobbyCanvas;
     [SerializeField] LobbySceneRoomCanvas roomCanvas;
 
+    void Awake()
+    {
+        curPanel = Panel.Lobby;
+    }
+
     void Start()
     {
         if (PhotonNetwork.InRoom)
@@ -21,10 +26,6 @@ public class LobbyPUNManager : MonoBehaviourPunCallbacks
         else if (PhotonNetwork.InLobby)
         {
             OnJoinedLobby();
-        }
-        else
-        {
-            OnDisconnected(DisconnectCause.None);
         }
     }
 
@@ -98,11 +99,6 @@ public class LobbyPUNManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         SetActivePanel(Panel.Lobby);
-    }
-
-    public override void OnRoomListUpdate(List<RoomInfo> roomList)
-    {
-
     }
 
     public override void OnLeftLobby()

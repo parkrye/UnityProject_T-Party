@@ -32,6 +32,7 @@ public class TitleSceneCanvas : SceneUI
         ExitGames.Client.Photon.Hashtable props = new()
         {
             { GameData.PLAYER_NAME, playerName },
+            { GameData.PLAYER_AVATAR, 0 },
             { GameData.PLAYER_READY, false },
             { GameData.PLAYER_LOAD, false },
         };
