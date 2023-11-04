@@ -36,23 +36,23 @@ public class LobbySceneLobbyCanvas : SceneUI
 
     void OnUpAvatarButtonTouched()
     {
-        GameData.PLAYER_AVATAR--;
-        if (GameData.PLAYER_AVATAR < 0)
-            GameData.PLAYER_AVATAR = 4;
+        GameData.PLAYER_AVATAR_NUM--;
+        if (GameData.PLAYER_AVATAR_NUM < 0)
+            GameData.PLAYER_AVATAR_NUM = 4;
         ChangeAvatarImage();
     }
 
     void OnDownAvatarButtonTouched()
     {
-        GameData.PLAYER_AVATAR++;
-        if (GameData.PLAYER_AVATAR > 4)
-            GameData.PLAYER_AVATAR = 0;
+        GameData.PLAYER_AVATAR_NUM++;
+        if (GameData.PLAYER_AVATAR_NUM > 4)
+            GameData.PLAYER_AVATAR_NUM = 0;
         ChangeAvatarImage();
     }
 
     void ChangeAvatarImage()
     {
-        images["AvatarImage"].sprite = GameData.AVATAR[GameData.PLAYER_AVATAR];
-        PhotonNetwork.LocalPlayer.CustomProperties[GameData.PLAYER_AVATAR] = GameData.PLAYER_AVATAR;
+        images["AvatarImage"].sprite = GameData.AVATAR[GameData.PLAYER_AVATAR_NUM];
+        PhotonNetwork.LocalPlayer.SetAvatar(GameData.PLAYER_AVATAR_NUM);
     }
 }

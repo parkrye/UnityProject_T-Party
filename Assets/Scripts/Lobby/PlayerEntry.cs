@@ -6,6 +6,7 @@ using Photon.Realtime;
 public class PlayerEntry : SceneUI
 {
     public Player player;
+    public bool isUsing;
 
     public void Initialize(Player _player)
     {
@@ -14,14 +15,11 @@ public class PlayerEntry : SceneUI
         player = _player;
 
         texts["PlayerName"].text = player.NickName;
-        int avatarNum = 0;
-        player.CustomProperties.TryGetValue(GameData.PLAYER_AVATAR, out avatarNum);
-        images["PlayerImage"].sprite = GameData.AVATAR[avatarNum];
+        images["PlayerImage"].sprite = GameData.AVATAR[player.GetAvatar()];
 
-        if (CustomProperty.GetReady(player))
-        {
-            SetPlayerReady(true);
-        }
+        SetPlayerReady(CustomProperty.GetReady(player));
+
+        isUsing = true;
     }
 
     public void ResetEntry()
@@ -29,6 +27,9 @@ public class PlayerEntry : SceneUI
         player = null;
         texts["PlayerName"].text = "";
         images["PlayerImage"].sprite = null;
+        SetPlayerReady(false);
+
+        isUsing = false;
     }
 
     public void SetPlayerReady(bool ready)
@@ -36,7 +37,7 @@ public class PlayerEntry : SceneUI
         images["ReadyImage"].gameObject.SetActive(ready);
     }
 
-    public void OnReadyButtonClicked()
+    public void Ready()
     {
         bool isPlayerReady = !CustomProperty.GetReady(player);
         CustomProperty.SetReady(player, isPlayerReady);

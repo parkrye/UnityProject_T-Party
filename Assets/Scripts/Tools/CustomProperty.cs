@@ -55,4 +55,21 @@ public static class CustomProperty
         };
         room.SetCustomProperties(property);
     }
+    public static int GetAvatar(this Player player)
+    {
+        ExitGames.Client.Photon.Hashtable property = player.CustomProperties;
+        if (property.ContainsKey(GameData.PLAYER_AVATAR))
+            return (int)property[GameData.PLAYER_AVATAR];
+        else
+            return 0;
+    }
+
+    public static void SetAvatar(this Player player, int avatarNum)
+    {
+        ExitGames.Client.Photon.Hashtable property = new()
+        {
+            [GameData.PLAYER_AVATAR] = avatarNum
+        };
+        player.SetCustomProperties(property);
+    }
 }

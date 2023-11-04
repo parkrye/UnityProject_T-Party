@@ -28,6 +28,7 @@ public class TitleSceneCanvas : SceneUI
         }
 
         GameData.PLAYER_NAME = playerName;
+        GameData.PLAYER_AVATAR_NUM = 0;
 
         ExitGames.Client.Photon.Hashtable props = new()
         {

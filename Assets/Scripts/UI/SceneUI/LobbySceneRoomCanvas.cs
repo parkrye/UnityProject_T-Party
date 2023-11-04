@@ -9,14 +9,19 @@ public class LobbySceneRoomCanvas : SceneUI
     protected override void Awake()
     {
         base.Awake();
+
+        buttons["ReadyButton"].onClick.AddListener(OnReadyButtonTouched);
+        buttons["QuitButton"].onClick.AddListener(OnLeaveRoomTouched);
+
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
-        int index = 0;
-        for(index = 0; index < PhotonNetwork.PlayerList.Length; index++)
+        ResetAllEntries();
+
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
-            playerEntryList[index].Initialize(PhotonNetwork.PlayerList[index]);
+            playerEntryList[i].Initialize(PhotonNetwork.PlayerList[i]);
         }
 
         PhotonNetwork.LocalPlayer.SetReady(false);
@@ -26,20 +31,22 @@ public class LobbySceneRoomCanvas : SceneUI
         PhotonNetwork.AutomaticallySyncScene = true;
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
-        foreach (PlayerEntry entry in playerEntryList)
-        {
-            entry.ResetEntry();
-        }
+        ResetAllEntries();
 
         PhotonNetwork.AutomaticallySyncScene = false;
     }
 
     public void PlayerEnterRoom(Player newPlayer)
     {
-        int index = PhotonNetwork.PlayerList.Length - 1;
-        playerEntryList[index].Initialize(PhotonNetwork.PlayerList[index]);
+        for (int i = 0; i < 8; i++)
+        {
+            if (playerEntryList[i].isUsing)
+                continue;
+
+            playerEntryList[i].Initialize(newPlayer);
+        }
 
         AllPlayerReadyCheck();
 
@@ -48,8 +55,11 @@ public class LobbySceneRoomCanvas : SceneUI
 
     public void PlayerLeftRoom(Player leftPlayer)
     {
-        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        for (int i = 0; i < 8; i++)
         {
+            if (!playerEntryList[i].isUsing)
+                continue;
+
             if (playerEntryList[i].player.Equals(leftPlayer))
             {
                 playerEntryList[i].ResetEntry();
@@ -63,11 +73,14 @@ public class LobbySceneRoomCanvas : SceneUI
 
     public void PlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        for (int i = 0; i < 8; i++)
         {
+            if (!playerEntryList[i].isUsing)
+                continue;
+
             if (playerEntryList[i].player.Equals(targetPlayer))
             {
-
+                playerEntryList[i].SetPlayerReady(targetPlayer.GetReady());
                 break;
             }
         }
@@ -81,41 +94,24 @@ public class LobbySceneRoomCanvas : SceneUI
 
     public void UpdateRoomState()
     {
-        if (!PhotonNetwork.IsMasterClient)
-            return;
 
-        buttons["ReadyButton"].gameObject.SetActive(CheckPlayerReady());
-    }
-
-    public bool CheckPlayerReady()
-    {
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            return CustomProperty.GetReady(player);
-        }
-
-        return true;
     }
 
     void AllPlayerReadyCheck()
     {
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            buttons["ReadyButton"].gameObject.SetActive(false);
-            return;
-        }
-
         int readyCount = 0;
         foreach (Player player in PhotonNetwork.PlayerList)
         {
             if (player.GetReady())
                 readyCount++;
+            else
+                break;
         }
 
-        if (readyCount == PhotonNetwork.PlayerList.Length)
-            buttons["ReadyButton"].gameObject.SetActive(true);
-        else
-            buttons["ReadyButton"].gameObject.SetActive(false);
+        if (readyCount < PhotonNetwork.PlayerList.Length)
+            return;
+
+        PhotonNetwork.LoadLevel("MainScene");
     }
 
     public void OnSwitchMasterClient(Player clickedPlayer)
@@ -125,16 +121,31 @@ public class LobbySceneRoomCanvas : SceneUI
         PhotonNetwork.SetMasterClient(clickedPlayer);
     }
 
-    public void OnStartButtonClicked()
+    public void OnReadyButtonTouched()
     {
-        PhotonNetwork.CurrentRoom.IsOpen = false;
-        PhotonNetwork.CurrentRoom.IsVisible = false;
+        for (int i = 0; i < 8; i++)
+        {
+            if (!playerEntryList[i].isUsing)
+                continue;
 
-        //PhotonNetwork.LoadLevel("InGameScene");
+            if (playerEntryList[i].player.Equals(PhotonNetwork.LocalPlayer))
+            {
+                playerEntryList[i].Ready();
+                break;
+            }
+        }
     }
 
-    public void OnLeaveRoomClicked()
+    public void OnLeaveRoomTouched()
     {
         PhotonNetwork.LeaveRoom();
+    }
+
+    void ResetAllEntries()
+    {
+        foreach (PlayerEntry entry in playerEntryList)
+        {
+            entry.ResetEntry();
+        }
     }
 }
