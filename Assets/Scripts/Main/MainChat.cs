@@ -52,28 +52,11 @@ public class RoomChat : SceneUI
         {
             yield return null;
 
-            if (!nowChatting)
-            {
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    nowChatting = true;
-                    inputFields["ChatInputField"].ActivateInputField();
-                }
-            }
-            else if (nowChatting)
-            {
-                if (Input.GetKeyDown(KeyCode.Escape))
-                {
-                    nowChatting = false;
-                    inputFields["ChatInputField"].DeactivateInputField();
-                }
-            }
-
             //Show messages
             for (int i = 0; i < chatMessages.Count; i++)
             {
                 TMP_Text message = Instantiate(chatPrefab, content);
-                message.text = chatMessages[i].sender + ": " + chatMessages[i].message;
+                message.text = chatMessages[i].sender + ":" + chatMessages[i].message;
                 scrollRect.normalizedPosition = new Vector2(0f, 0f);
             }
             chatMessages.Clear();
@@ -96,7 +79,7 @@ public class RoomChat : SceneUI
     {
         ChatMessage m = new()
         {
-            sender = sender.NickName,
+            sender = $"{sender.NickName}[{sender.ActorNumber}]",
             message = message
         };
 
