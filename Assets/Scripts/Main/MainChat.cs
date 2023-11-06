@@ -2,12 +2,11 @@ using ExitGames.Client.Photon;
 using Photon.Chat;
 using Photon.Chat.Demo;
 using Photon.Pun;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 public class MainChat : SceneUI, IChatClientListener
 {
-    string[] channels;
+    [SerializeField] string[] channels;
     int chnnel;
 
     [SerializeField] int HistoryLengthToFetch;
