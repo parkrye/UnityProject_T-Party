@@ -6,6 +6,8 @@ public class DataManager : BaseManager
     {
         base.Initialize();
 
+        Application.runInBackground = true;
+
         GameData.AVATAR = new Sprite[5];
         for(int i = 0; i < 5; i++)
         {

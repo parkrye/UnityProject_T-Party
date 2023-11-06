@@ -108,7 +108,7 @@ public class LobbySceneRoomCanvas : SceneUI
                 break;
         }
 
-        if (readyCount < PhotonNetwork.PlayerList.Length)
+        if (readyCount < PhotonNetwork.PlayerList.Length || readyCount == 0)
             return;
 
         PhotonNetwork.LoadLevel("MainScene");

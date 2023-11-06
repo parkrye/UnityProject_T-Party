@@ -1,97 +1,149 @@
-using System.Collections.Generic;
-using UnityEngine;
+using ExitGames.Client.Photon;
+using Photon.Chat;
+using Photon.Chat.Demo;
 using Photon.Pun;
-using Photon.Realtime;
-using System.Collections;
-using TMPro;
-using UnityEngine.UI;
+using UnityEditor.VersionControl;
+using UnityEngine;
 
-public class RoomChat : SceneUI
+public class MainChat : SceneUI, IChatClientListener
 {
-    [SerializeField] ScrollRect scrollRect;
-    [SerializeField] RectTransform content;
-    [SerializeField] TMP_Text chatPrefab;
-    [SerializeField] bool nowChatting;
+    string[] channels;
+    int chnnel;
 
-    public override void Initialize()
-    {
+    [SerializeField] int HistoryLengthToFetch;
 
-    }
+    ChatClient chatClient;
+    ChatAppSettings chatAppSettings;
 
     protected override void Awake()
     {
         base.Awake();
-        chatPrefab = GameManager.Resource.Load<TMP_Text>("UI/ChatText");
-    }
 
-    [System.Serializable]
-    public class ChatMessage
-    {
-        public string sender = "";
-        public string message = "";
-    }
+        inputFields["ChatInputField"].onSubmit.AddListener(InputChat);
 
-    readonly List<ChatMessage> chatMessages = new();
+        chatAppSettings = PhotonNetwork.PhotonServerSettings.AppSettings.GetChatSettings();
+    }
 
     void Start()
     {
-        nowChatting = false;
-        inputFields["ChatInputField"].onSubmit.AddListener(SubmitChat);
-
-        StartCoroutine(URoutine());
+        chatClient = new ChatClient(this);
+        chatClient.UseBackgroundWorkerForSending = true;
+        chatClient.AuthValues = new AuthenticationValues(GameData.PLAYER_NAME);
+        chatClient.ConnectUsingSettings(chatAppSettings);
+        
     }
 
-    void OnEnable()
+    void OnDestroy()
     {
-        ClearChat();
+        chatClient.Disconnect();
     }
 
-    IEnumerator URoutine()
+    void OnApplicationQuit()
     {
-        while (true)
+        chatClient.Disconnect();
+    }
+
+    public void AddLine(string lineString, int ch = 0)
+    {
+        texts["ChatText"].text += lineString + "\n";
+
+        chatClient.PublishMessage(channels[ch], lineString);
+    }
+
+    public void DebugReturn(DebugLevel level, string message)
+    {
+        if (level == ExitGames.Client.Photon.DebugLevel.ERROR)
         {
-            yield return null;
-
-            //Show messages
-            for (int i = 0; i < chatMessages.Count; i++)
-            {
-                TMP_Text message = Instantiate(chatPrefab, content);
-                message.text = chatMessages[i].sender + ":" + chatMessages[i].message;
-                scrollRect.normalizedPosition = new Vector2(0f, 0f);
-            }
-            chatMessages.Clear();
+            Debug.LogError(message);
+        }
+        else if (level == ExitGames.Client.Photon.DebugLevel.WARNING)
+        {
+            Debug.LogWarning(message);
+        }
+        else
+        {
+            Debug.Log(message);
         }
     }
 
-    void SubmitChat(string text)
+    public void OnChatStateChange(ChatState state)
     {
-        if (text.Replace(" ", "") != "")
+        Debug.Log($"OnChatStateChange: {state}");
+    }
+
+    public void OnConnected()
+    {
+        if (this.channels != null && this.channels.Length > 0)
         {
-            //Send message
-            photonView.RPC("SendChat", RpcTarget.AllViaServer, PhotonNetwork.LocalPlayer, inputFields["ChatInputField"].text);
-            inputFields["ChatInputField"].text = "";
-            nowChatting = false;
+            this.chatClient.Subscribe(this.channels, this.HistoryLengthToFetch);
+        }
+
+        AddLine($"[{GameData.PLAYER_NAME}] 채팅 서버에 연결되었습니다");
+
+        chatClient.SetOnlineStatus(ChatUserStatus.Online);
+    }
+
+    public void OnDisconnected()
+    {
+        AddLine($"[{GameData.PLAYER_NAME}] 채팅 서버에 연결이 끊겼습니다");
+    }
+
+    public void OnGetMessages(string channelName, string[] senders, object[] messages)
+    {
+        for(int i = 0; i < senders.Length; i++)
+        {
+            AddLine($"{senders[i]}: {messages[i]}");
         }
     }
 
-    [PunRPC]
-    void SendChat(Player sender, string message)
+    public void OnPrivateMessage(string sender, object message, string channelName)
     {
-        ChatMessage m = new()
-        {
-            sender = $"{sender.NickName}[{sender.ActorNumber}]",
-            message = message
-        };
-
-        chatMessages.Insert(0, m);
+        AddLine($"[비밀] {sender}: {message}");
     }
 
-    public void ClearChat()
+    public void OnStatusUpdate(string user, int status, bool gotMessage, object message)
     {
-        TMP_Text[] chatList = content.GetComponentsInChildren<TMP_Text>();
-        for (int i = 0; i < chatList.Length; i++)
+        Debug.Log($"OnStatusUpdate: user:{user}, status:{status}, msg:{message}");
+    }
+
+    public void OnSubscribed(string[] channels, bool[] results)
+    {
+        foreach (string channel in channels)
         {
-            Destroy(chatList[i].gameObject);
+            AddLine($"[{GameData.PLAYER_NAME}] 채팅 서버에 입장되었습니다");
         }
+    }
+
+    public void OnUnsubscribed(string[] channels)
+    {
+        AddLine($"[{GameData.PLAYER_NAME}] 채팅 서버에 퇴장되었습니다");
+    }
+
+    public void OnUserSubscribed(string channel, string user)
+    {
+        AddLine($"[{GameData.PLAYER_NAME}] 채팅 서버에 입장되었습니다");
+    }
+
+    public void OnUserUnsubscribed(string channel, string user)
+    {
+        AddLine($"[{GameData.PLAYER_NAME}] 채팅 서버에 퇴장되었습니다");
+    }
+
+    void Update()
+    {
+        if (chatClient == null)
+            return;
+
+        chatClient.Service();
+    }
+
+    public void InputChat(string text)
+    {
+        inputFields["ChatInputField"].text = "";
+
+        if (chatClient.State != ChatState.ConnectedToFrontEnd)
+            return;
+
+        AddLine($"{GameData.PLAYER_NAME}: {text}", chnnel);
     }
 }

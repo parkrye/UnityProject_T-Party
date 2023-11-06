@@ -86,17 +86,17 @@ namespace Photon.Chat.Demo
 
         // private static string WelcomeText = "Welcome to chat. Type \\help to list commands.";
         private static string HelpText = "\n    -- HELP --\n" +
-            "To subscribe to channel(s) (channelnames are case sensitive) :  \n" +
+            "To subscribe to channels(s) (channelnames are case sensitive) :  \n" +
                 "\t<color=#E07B00>\\subscribe</color> <color=green><list of channelnames></color>\n" +
                 "\tor\n" +
                 "\t<color=#E07B00>\\s</color> <color=green><list of channelnames></color>\n" +
                 "\n" +
-                "To leave channel(s):\n" +
+                "To leave channels(s):\n" +
                 "\t<color=#E07B00>\\unsubscribe</color> <color=green><list of channelnames></color>\n" +
                 "\tor\n" +
                 "\t<color=#E07B00>\\u</color> <color=green><list of channelnames></color>\n" +
                 "\n" +
-                "To switch the active channel\n" +
+                "To switch the active channels\n" +
                 "\t<color=#E07B00>\\join</color> <color=green><channelname></color>\n" +
                 "\tor\n" +
                 "\t<color=#E07B00>\\j</color> <color=green><channelname></color>\n" +
@@ -480,7 +480,7 @@ namespace Photon.Chat.Demo
         {
             if (this.channelToggles.ContainsKey(channelName))
             {
-                Debug.Log("Skipping creation for an existing channel toggle.");
+                Debug.Log("Skipping creation for an existing channels toggle.");
                 return;
             }
 
@@ -517,7 +517,7 @@ namespace Photon.Chat.Demo
 
                     this.channelToggles.Remove(channelName);
 
-                    Debug.Log("Unsubscribed from channel '" + channelName + "'.");
+                    Debug.Log("Unsubscribed from channels '" + channelName + "'.");
 
                     // Showing another channel if the active channel is the one we unsubscribed from before
                     if (channelName == this.selectedChannelName && this.channelToggles.Count > 0)
@@ -532,7 +532,7 @@ namespace Photon.Chat.Demo
                 }
                 else
                 {
-                    Debug.Log("Can't unsubscribe from channel '" + channelName + "' because you are currently not subscribed to it.");
+                    Debug.Log("Can't unsubscribe from channels '" + channelName + "' because you are currently not subscribed to it.");
                 }
             }
         }
@@ -585,12 +585,12 @@ namespace Photon.Chat.Demo
 
         public void OnUserSubscribed(string channel, string user)
         {
-            Debug.LogFormat("OnUserSubscribed: channel=\"{0}\" userId=\"{1}\"", channel, user);
+            Debug.LogFormat("OnUserSubscribed: channels=\"{0}\" userId=\"{1}\"", channel, user);
         }
 
         public void OnUserUnsubscribed(string channel, string user)
         {
-            Debug.LogFormat("OnUserUnsubscribed: channel=\"{0}\" userId=\"{1}\"", channel, user);
+            Debug.LogFormat("OnUserUnsubscribed: channels=\"{0}\" userId=\"{1}\"", channel, user);
         }
 
         /// <inheritdoc />
@@ -601,13 +601,13 @@ namespace Photon.Chat.Demo
 
         public void OnUserPropertiesChanged(string channel, string targetUserId, string senderUserId, Dictionary<object, object> properties)
         {
-            Debug.LogFormat("OnUserPropertiesChanged: (channel:{0} user:{1}) by {2}. Props: {3}.", channel, targetUserId, senderUserId, Extensions.ToStringFull(properties));
+            Debug.LogFormat("OnUserPropertiesChanged: (channels:{0} user:{1}) by {2}. Props: {3}.", channel, targetUserId, senderUserId, Extensions.ToStringFull(properties));
         }
 
         /// <inheritdoc />
         public void OnErrorInfo(string channel, string error, object data)
         {
-            Debug.LogFormat("OnErrorInfo for channel {0}. Error: {1} Data: {2}", channel, error, data);
+            Debug.LogFormat("OnErrorInfo for channels {0}. Error: {1} Data: {2}", channel, error, data);
         }
 
         public void AddMessageToSelectedChannel(string msg)
@@ -616,7 +616,7 @@ namespace Photon.Chat.Demo
             bool found = this.chatClient.TryGetChannel(this.selectedChannelName, out channel);
             if (!found)
             {
-                Debug.Log("AddMessageToSelectedChannel failed to find channel: " + this.selectedChannelName);
+                Debug.Log("AddMessageToSelectedChannel failed to find channels: " + this.selectedChannelName);
                 return;
             }
 
@@ -639,7 +639,7 @@ namespace Photon.Chat.Demo
             bool found = this.chatClient.TryGetChannel(channelName, out channel);
             if (!found)
             {
-                Debug.Log("ShowChannel failed to find channel: " + channelName);
+                Debug.Log("ShowChannel failed to find channels: " + channelName);
                 return;
             }
 
