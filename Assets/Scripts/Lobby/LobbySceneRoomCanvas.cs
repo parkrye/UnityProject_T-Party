@@ -13,6 +13,7 @@ public class LobbySceneRoomCanvas : SceneUI
         buttons["ReadyButton"].onClick.AddListener(OnReadyButtonTouched);
         buttons["QuitButton"].onClick.AddListener(OnLeaveRoomTouched);
 
+        playerEntryList = GetComponentsInChildren<PlayerEntry>();
     }
 
     void OnEnable()

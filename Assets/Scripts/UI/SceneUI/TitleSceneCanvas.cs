@@ -27,8 +27,8 @@ public class TitleSceneCanvas : SceneUI
             playerName = $"Mob {Random.Range(1000, 5000)}";
         }
 
-        GameData.PLAYER_NAME = playerName;
-        GameData.PLAYER_AVATAR_NUM = 0;
+        GameManager.Data.playerName = playerName;
+        GameManager.Data.playerAvatar = 0;
 
         ExitGames.Client.Photon.Hashtable props = new()
         {

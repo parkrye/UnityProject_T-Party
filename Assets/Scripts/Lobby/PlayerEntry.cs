@@ -15,7 +15,7 @@ public class PlayerEntry : SceneUI
         player = _player;
 
         texts["PlayerName"].text = player.NickName;
-        images["PlayerImage"].sprite = GameData.AVATAR[player.GetAvatar()];
+        images["PlayerImage"].sprite = GameManager.Data.AVATAR[player.GetAvatar()];
 
         SetPlayerReady(CustomProperty.GetReady(player));
 

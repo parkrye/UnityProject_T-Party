@@ -7,7 +7,7 @@ public class LobbySceneLobbyCanvas : SceneUI
     {
         base.Awake();
 
-        texts["NameText"].text = GameData.PLAYER_NAME;
+        texts["NameText"].text = GameManager.Data.playerName;
         buttons["JoinButton"].onClick.AddListener(OnRandomMatchingButtonTouched);
         buttons["BackButton"].onClick.AddListener(OnLeaveLobbyButtonTouched);
         buttons["UpAvatarButton"].onClick.AddListener(OnUpAvatarButtonTouched);
@@ -36,23 +36,23 @@ public class LobbySceneLobbyCanvas : SceneUI
 
     void OnUpAvatarButtonTouched()
     {
-        GameData.PLAYER_AVATAR_NUM--;
-        if (GameData.PLAYER_AVATAR_NUM < 0)
-            GameData.PLAYER_AVATAR_NUM = 4;
+        GameManager.Data.playerAvatar--;
+        if (GameManager.Data.playerAvatar < 0)
+            GameManager.Data.playerAvatar = 4;
         ChangeAvatarImage();
     }
 
     void OnDownAvatarButtonTouched()
     {
-        GameData.PLAYER_AVATAR_NUM++;
-        if (GameData.PLAYER_AVATAR_NUM > 4)
-            GameData.PLAYER_AVATAR_NUM = 0;
+        GameManager.Data.playerAvatar++;
+        if (GameManager.Data.playerAvatar > 4)
+            GameManager.Data.playerAvatar = 0;
         ChangeAvatarImage();
     }
 
     void ChangeAvatarImage()
     {
-        images["AvatarImage"].sprite = GameData.AVATAR[GameData.PLAYER_AVATAR_NUM];
-        PhotonNetwork.LocalPlayer.SetAvatar(GameData.PLAYER_AVATAR_NUM);
+        images["AvatarImage"].sprite = GameManager.Data.AVATAR[GameManager.Data.playerAvatar];
+        PhotonNetwork.LocalPlayer.SetAvatar(GameManager.Data.playerAvatar);
     }
 }

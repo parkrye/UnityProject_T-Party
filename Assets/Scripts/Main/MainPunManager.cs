@@ -6,9 +6,12 @@ using UnityEngine;
 
 public class MainPunManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] GameObject talkCanvas, voteCanvas, nightCanvas;
+    [SerializeField] GameObject morningCanvas, eveningCanvas, nightCanvas;
 
-    int readyPlayerCount;
+    MainChat chat;
+
+    enum Time { Morning, Evening, Night}
+    Time time;
 
     Dictionary<int, bool> aliveDictionary;
     List<int> normalStudents;
@@ -16,15 +19,11 @@ public class MainPunManager : MonoBehaviourPunCallbacks
 
     void Awake()
     {
-        readyPlayerCount = 0;
-
         aliveDictionary = new Dictionary<int, bool>();
         normalStudents = new List<int>();
         spyStudents = new List<int>();
 
-        talkCanvas.SetActive(true);
-        voteCanvas.SetActive(false);
-        nightCanvas.SetActive(false);
+        chat = morningCanvas.GetComponent<MainChat>();
 
         PhotonNetwork.LocalPlayer.SetLoad(true);
 
@@ -36,13 +35,13 @@ public class MainPunManager : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        //Debug.Log($"Disconnected : {cause}");
+        Debug.Log($"Disconnected : {cause}");
         GameManager.Scene.LoadScene("LobbyScene");
     }
 
     public override void OnLeftRoom()
     {
-        //Debug.Log("Left Room");
+        Debug.Log("Left Room");
         PhotonNetwork.LoadLevel("LobbyScene");
     }
 
@@ -76,31 +75,64 @@ public class MainPunManager : MonoBehaviourPunCallbacks
 
     void GameSetting()
     {
-        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
-        {
-            normalStudents.Add(i);
-            aliveDictionary.Add(i, true);
-        }
+        bool[] spyArray = new bool[PhotonNetwork.PlayerList.Length];
 
         int spyCount = (PhotonNetwork.PlayerList.Length >> 2) > 0 ? (PhotonNetwork.PlayerList.Length >> 2) : 1;
 
         while(spyCount > 0)
         {
             int nextSpy = Random.Range(0, PhotonNetwork.PlayerList.Length);
-            if (spyStudents.Contains(nextSpy))
+            if (spyArray[nextSpy])
                 continue;
-            spyStudents.Add(nextSpy);
-            normalStudents.Remove(nextSpy);
+            spyArray[nextSpy] = true;
+            spyCount--;
         }
 
-        photonView.RPC("RequestSynchronizeData", RpcTarget.AllBufferedViaServer, aliveDictionary, normalStudents, spyStudents);
+        photonView.RPC("RequestSynchronizeData", RpcTarget.AllBufferedViaServer, spyArray);
     }
 
     [PunRPC]
-    void RequestSynchronizeData(Dictionary<int, bool> _alive, List<int> _norm, List<int> _spy)
+    void RequestSynchronizeData(bool[] spyArray)
     {
-        aliveDictionary = _alive;
-        normalStudents = _norm;
-        spyStudents = _spy;
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        {
+            aliveDictionary.Add(i, true);
+            if (spyArray[i])
+                spyStudents.Add(i);
+            else
+                normalStudents.Add(i);
+        }
+
+        if (spyStudents.Contains(PhotonNetwork.LocalPlayer.ActorNumber))
+            GameManager.Data.playerState = GameData.PlayerState.Spy;
+
+        chat.EnableChatServer();
+        TimeFlow(Time.Morning);
+    }
+
+    [PunRPC]
+    void TimeFlow(Time _time)
+    {
+        time = _time;
+
+        switch (time)
+        {
+            default:
+            case Time.Morning:
+                morningCanvas.SetActive(true);
+                eveningCanvas.SetActive(false);
+                nightCanvas.SetActive(false);
+                break;
+            case Time.Evening:
+                morningCanvas.SetActive(false);
+                eveningCanvas.SetActive(true);
+                nightCanvas.SetActive(false);
+                break;
+            case Time.Night:
+                morningCanvas.SetActive(false);
+                eveningCanvas.SetActive(false);
+                nightCanvas.SetActive(true);
+                break;
+        }
     }
 }

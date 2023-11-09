@@ -22,15 +22,10 @@ public class LobbyPUNManager : MonoBehaviourPunCallbacks
         {
             OnJoinedRoom();
         }
-        else if (PhotonNetwork.InLobby)
+        else
         {
             OnJoinedLobby();
         }
-    }
-
-    public override void OnEnable()
-    {
-        base.OnEnable();
     }
 
     public override void OnConnectedToMaster()
