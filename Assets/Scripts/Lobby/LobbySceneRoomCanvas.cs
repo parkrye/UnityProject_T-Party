@@ -47,6 +47,7 @@ public class LobbySceneRoomCanvas : SceneUI
                 continue;
 
             playerEntryList[i].Initialize(newPlayer);
+            break;
         }
 
         AllPlayerReadyCheck();

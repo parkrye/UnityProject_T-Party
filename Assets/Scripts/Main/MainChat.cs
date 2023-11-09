@@ -107,10 +107,6 @@ public class MainChat : SceneUI, IChatClientListener
         {
             ShowChannel(channels[channel]);
         }
-        for (int i = 0; i < senders.Length; i++)
-        {
-            AddLine($"{senders[i]}: {messages[i]}");
-        }
     }
 
     public void OnPrivateMessage(string sender, object message, string channelName)
